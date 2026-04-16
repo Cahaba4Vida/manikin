@@ -1,0 +1,461 @@
+:root {
+  --bg: #090b0d;
+  --panel: rgba(16, 19, 24, 0.9);
+  --panel-2: rgba(21, 25, 31, 0.98);
+  --border: rgba(255, 255, 255, 0.08);
+  --muted: #9aa6b2;
+  --text: #f4f7fb;
+  --accent: #d8c29c;
+  --accent-2: #75b5c9;
+  --shadow: 0 20px 70px rgba(0, 0, 0, 0.42);
+  --radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(117, 181, 201, 0.14), transparent 26%),
+    radial-gradient(circle at top right, rgba(216, 194, 156, 0.12), transparent 24%),
+    linear-gradient(180deg, #090b0d 0%, #11151a 100%);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  padding: 20px;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.app-shell {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: rgba(8, 10, 12, 0.7);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+
+.subtext {
+  margin: 12px 0 0;
+  max-width: 760px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.pill {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: #d7dee6;
+  white-space: nowrap;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr) minmax(260px, 330px);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.panel,
+.viewer-frame {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.panel {
+  padding: 18px;
+}
+
+.viewer-panel {
+  min-width: 0;
+}
+
+.viewer-frame {
+  position: relative;
+  min-height: 780px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center 20%, rgba(117, 181, 201, 0.14), transparent 24%),
+    linear-gradient(180deg, #11161d 0%, #0a0d11 100%);
+}
+
+#viewerCanvas {
+  display: block;
+  width: 100%;
+  height: 780px;
+}
+
+
+.viewer-toolbar {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.viewer-toolbar-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  pointer-events: auto;
+}
+
+.viewer-chip,
+.tool-button {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 10, 12, 0.68);
+  backdrop-filter: blur(12px);
+  color: #eef3f8;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.viewer-chip {
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.74rem;
+  color: var(--accent);
+}
+
+.tool-button {
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.tool-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(117, 181, 201, 0.45);
+}
+
+.tool-button.active {
+  background: rgba(216, 194, 156, 0.12);
+  border-color: rgba(216, 194, 156, 0.7);
+}
+
+.viewer-overlay {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.viewer-overlay-card {
+  min-width: min(640px, 100%);
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(10, 12, 16, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  text-align: center;
+}
+
+.overlay-label {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.viewer-overlay-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.price-line {
+  margin: 6px 0 0;
+  color: var(--accent);
+}
+
+.panel-section + .panel-section {
+  margin-top: 20px;
+}
+
+.panel-section h2 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.ghost-button {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e5ebf2;
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.ghost-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.product-list {
+  display: grid;
+  gap: 10px;
+}
+
+.product-card {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 14px;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(117, 181, 201, 0.45);
+}
+
+.product-card.active {
+  border-color: rgba(216, 194, 156, 0.75);
+  background: rgba(216, 194, 156, 0.08);
+}
+
+.product-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.product-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.slot-tag {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(117, 181, 201, 0.12);
+  border: 1px solid rgba(117, 181, 201, 0.25);
+  color: #baddf1;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.product-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.variant-note {
+  margin-top: 8px;
+  color: #cfd8e0;
+  font-size: 0.84rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.swatch-row {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mini-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.color-button {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color-button.active {
+  border-color: rgba(216, 194, 156, 0.75);
+  background: rgba(216, 194, 156, 0.08);
+}
+
+.swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex: 0 0 auto;
+}
+
+.empty-state {
+  padding: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.summary-card,
+.notes-box {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.summary-row:last-child {
+  border-bottom: 0;
+}
+
+.notes-box ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+@media (max-width: 1180px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .viewer-frame {
+    min-height: 600px;
+  }
+
+  #viewerCanvas {
+    height: 600px;
+  }
+}
+
+@media (max-width: 760px) {
+  .viewer-toolbar {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body {
+    padding: 12px;
+  }
+
+  .topbar,
+  .panel {
+    padding: 16px;
+  }
+
+  .pill-row {
+    justify-content: flex-start;
+  }
+
+  .viewer-frame {
+    min-height: 520px;
+  }
+
+  #viewerCanvas {
+    height: 520px;
+  }
+
+  .viewer-overlay {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .color-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
