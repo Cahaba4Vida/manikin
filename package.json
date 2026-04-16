@@ -1,0 +1,13 @@
+{
+  "name": "tactical-configurator-netlify-neon",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static Three.js tactical mannequin configurator with Netlify Functions and Neon.",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

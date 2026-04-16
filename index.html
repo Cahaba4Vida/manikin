@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tactical 3D Configurator</title>
+    <meta
+      name="description"
+      content="3D mannequin configurator with swappable vests and helmets for Netlify + Neon."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">NETLIFY + NEON MVP</p>
+          <h1>Tactical 3D Configurator</h1>
+          <p class="subtext">
+            Stylized male mannequin with fixed black long-sleeve shirt and black pants. Swap vest and helmet products, then set their colors independently.
+          </p>
+        </div>
+        <div class="pill-row">
+          <span class="pill" id="dataModePill">Loading products…</span>
+          <span class="pill">Spin with drag</span>
+          <span class="pill">Zoom with scroll/pinch</span>
+        </div>
+      </header>
+
+      <main class="main-grid">
+        <aside class="panel left-panel">
+          <section class="panel-section">
+            <div class="section-head">
+              <h2>Vests</h2>
+              <button class="ghost-button" id="resetVestButton">Reset</button>
+            </div>
+            <div id="vestList" class="product-list"></div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-head">
+              <h2>Helmets</h2>
+              <button class="ghost-button" id="resetHelmetButton">Reset</button>
+            </div>
+            <div id="helmetList" class="product-list"></div>
+          </section>
+        </aside>
+
+        <section class="viewer-panel">
+          <div class="viewer-frame">
+            <div class="viewer-toolbar">
+              <div class="viewer-toolbar-group">
+                <span class="viewer-chip">Studio View</span>
+              </div>
+              <div class="viewer-toolbar-group">
+                <button class="tool-button" id="viewFrontButton">Front</button>
+                <button class="tool-button active" id="viewQuarterButton">Quarter</button>
+                <button class="tool-button" id="viewSideButton">Side</button>
+              </div>
+            </div>
+            <canvas id="viewerCanvas"></canvas>
+            <div class="viewer-overlay">
+              <div class="viewer-overlay-card">
+                <p class="overlay-label">Selected Loadout</p>
+                <h3 id="selectedSummary">Loading…</h3>
+                <p id="selectedPrice" class="price-line"></p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel right-panel">
+          <section class="panel-section">
+            <h2>Vest Color</h2>
+            <div id="vestColorPicker" class="color-grid"></div>
+          </section>
+
+          <section class="panel-section">
+            <h2>Helmet Color</h2>
+            <div id="helmetColorPicker" class="color-grid"></div>
+          </section>
+
+          <section class="panel-section">
+            <h2>Current Setup</h2>
+            <div class="summary-card">
+              <div class="summary-row">
+                <span>Vest</span>
+                <strong id="vestName">None</strong>
+              </div>
+              <div class="summary-row">
+                <span>Vest color</span>
+                <strong id="vestColorName">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Helmet</span>
+                <strong id="helmetName">None</strong>
+              </div>
+              <div class="summary-row">
+                <span>Helmet color</span>
+                <strong id="helmetColorName">—</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-section notes-box">
+            <h2>Deploy notes</h2>
+            <ul>
+              <li>For a quick visual preview, drag this folder or ZIP to Netlify Drop.</li>
+              <li>For Neon-backed products, push to GitHub and import the repo into Netlify.</li>
+              <li>Set <code>NEON_DATABASE_URL</code> in Netlify before production use.</li>
+            </ul>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
