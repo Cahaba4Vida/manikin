@@ -6,6 +6,7 @@ create table if not exists products (
   category text not null check (category in ('vest', 'helmet')),
   style_key text not null,
   price_cents integer not null default 0,
+  model_url text,
   active boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default now()
@@ -36,6 +37,7 @@ set
   category = excluded.category,
   style_key = excluded.style_key,
   price_cents = excluded.price_cents,
+  model_url = excluded.model_url,
   sort_order = excluded.sort_order,
   active = true;
 

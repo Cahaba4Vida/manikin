@@ -2,7 +2,7 @@
 
 This is a deployable MVP for a tactical store product viewer:
 
-- fixed male mannequin
+- CC0 public male base mesh mannequin at runtime (with procedural fallback)
 - black pants + black long sleeve base outfit
 - swappable vest products
 - swappable helmet products
@@ -91,12 +91,11 @@ Insert into `products` with:
 
 Then add variants in `product_variants`.
 
-## Current MVP limitation
+## Current asset status
 
-This version does **not** use imported GLB models yet.
-The mannequin, vest, and helmet are built from simple Three.js shapes so the project works right away without an asset pipeline.
+This version now attempts to load a **public CC0 GLB male base mesh** at runtime for the mannequin.
 
-That is intentional for version 1.
+The vest and helmet are still built from procedural Three.js meshes in this ZIP, so the project stays deployable immediately without a full hosted-asset pipeline.
 
 ## Best next upgrade
 
@@ -109,3 +108,8 @@ That way the backend and product logic stay the same.
 
 
 Patch: switched Three.js imports to esm.sh for browser-safe module resolution on Netlify, and added a favicon to remove the 404 warning.
+
+
+## Public mannequin source
+
+The runtime mannequin source is the CC0 male base mesh from `BoQsc/Godot-3D-Male-Base-Mesh`. If that remote GLB fails to load, the site falls back automatically to the built-in mannequin.

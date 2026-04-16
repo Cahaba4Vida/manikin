@@ -7,6 +7,7 @@ const fallbackProducts = [
     category: 'vest',
     style_key: 'plate_carrier',
     price_cents: 26500,
+    model_url: null,
     active: true,
     variants: [
       { id: 'vest_plate_carrier_alpha_black', color_name: 'Black', color_code: '#181a1d' },
@@ -20,6 +21,7 @@ const fallbackProducts = [
     category: 'vest',
     style_key: 'chest_rig',
     price_cents: 17900,
+    model_url: null,
     active: true,
     variants: [
       { id: 'vest_chest_rig_scout_black', color_name: 'Black', color_code: '#181a1d' },
@@ -33,6 +35,7 @@ const fallbackProducts = [
     category: 'helmet',
     style_key: 'high_cut',
     price_cents: 32500,
+    model_url: null,
     active: true,
     variants: [
       { id: 'helmet_high_cut_echo_black', color_name: 'Black', color_code: '#17191c' },
@@ -46,6 +49,7 @@ const fallbackProducts = [
     category: 'helmet',
     style_key: 'mich',
     price_cents: 28900,
+    model_url: null,
     active: true,
     variants: [
       { id: 'helmet_mich_bravo_black', color_name: 'Black', color_code: '#191b1e' },
@@ -75,6 +79,7 @@ export async function handler() {
         p.category,
         p.style_key,
         p.price_cents,
+        p.model_url,
         p.active,
         coalesce(
           json_agg(

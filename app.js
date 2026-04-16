@@ -1,6 +1,7 @@
 import * as THREE from 'https://esm.sh/three@0.176.0';
 import { OrbitControls } from 'https://esm.sh/three@0.176.0/examples/jsm/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'https://esm.sh/three@0.176.0/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { GLTFLoader } from 'https://esm.sh/three@0.176.0/examples/jsm/loaders/GLTFLoader.js';
 
 const fallbackProducts = [
   {
@@ -72,7 +73,9 @@ const state = {
   selectedHelmet: null,
   selectedVestColor: colorFallbacks[0],
   selectedHelmetColor: colorFallbacks[0],
-  sourceMode: 'fallback'
+  sourceMode: 'fallback',
+  mannequinMode: 'procedural',
+  mannequinSourceName: 'Built-in procedural mannequin'
 };
 
 const ui = {
@@ -126,6 +129,22 @@ let activeView = 'quarter';
 const desiredCameraPosition = cameraViews.quarter.position.clone();
 const desiredCameraTarget = cameraViews.quarter.target.clone();
 
+const PUBLIC_MODEL_SOURCES = {
+  body: [
+    {
+      name: 'CC0 Male Base Mesh',
+      url: 'https://cdn.jsdelivr.net/gh/BoQsc/Godot-3D-Male-Base-Mesh@e7807327a8ebcc637831995a231dae701b6d4f56/Original/male_base_mesh.glb'
+    },
+    {
+      name: 'CC0 Male Base Mesh',
+      url: 'https://raw.githubusercontent.com/BoQsc/Godot-3D-Male-Base-Mesh/e7807327a8ebcc637831995a231dae701b6d4f56/Original/male_base_mesh.glb'
+    }
+  ]
+};
+
+const gltfLoader = new GLTFLoader();
+const gltfCache = new Map();
+
 const root = new THREE.Group();
 scene.add(root);
 
@@ -135,6 +154,12 @@ const motionGroup = new THREE.Group();
 motionGroup.add(mannequinGroup);
 motionGroup.add(gearGroup);
 root.add(motionGroup);
+
+const mannequinRootGroup = new THREE.Group();
+const proceduralFigureGroup = new THREE.Group();
+const remoteFigureGroup = new THREE.Group();
+mannequinGroup.add(mannequinRootGroup);
+mannequinGroup.add(remoteFigureGroup);
 
 const tempColor = new THREE.Color();
 const rounded = (w, h, d, r = 0.035, s = 6) => new RoundedBoxGeometry(w, h, d, s, r);
@@ -450,6 +475,8 @@ const setUvRepeat = (mesh, x = 1, y = 1) => {
 };
 
 const mannequinParts = [];
+let remoteBodyLoaded = false;
+let remoteBodySourceName = '';
 const basePose = {
   torsoBob: 0,
   torsoRoll: 0,
@@ -463,24 +490,23 @@ const basePose = {
 };
 
 const buildBaseMannequin = () => {
-  const mannequinRoot = new THREE.Group();
-  mannequinRoot.position.y = 0.06;
-  mannequinGroup.add(mannequinRoot);
+  mannequinRootGroup.position.y = 0.06;
 
   const plinth = makeMesh(new THREE.CylinderGeometry(0.76, 0.82, 0.11, 56), standMaterial, { y: 0.02 });
   plinth.receiveShadow = true;
-  mannequinRoot.add(plinth);
+  mannequinRootGroup.add(plinth);
 
   const stand = makeMesh(new THREE.CylinderGeometry(0.055, 0.065, 1.26, 28), standMaterial, { x: 0.06, y: 0.72, z: -0.12 });
-  mannequinRoot.add(stand);
+  mannequinRootGroup.add(stand);
 
   const feetBar = makeMesh(rounded(0.52, 0.045, 0.14, 0.018, 4), standMaterial, { x: 0.02, y: 0.09, z: 0.01 });
-  mannequinRoot.add(feetBar);
+  mannequinRootGroup.add(feetBar);
 
   const bodyRig = new THREE.Group();
   bodyRig.position.set(0, 0.11, 0);
   bodyRig.rotation.set(0, -0.04, 0.012);
-  mannequinRoot.add(bodyRig);
+  proceduralFigureGroup.add(bodyRig);
+  mannequinRootGroup.add(proceduralFigureGroup);
   mannequinParts.push({ target: bodyRig, property: 'positionY', base: bodyRig.position.y, amount: 0.014, speed: 1.1 });
   mannequinParts.push({ target: bodyRig, property: 'rotationZ', base: bodyRig.rotation.z, amount: 0.02, speed: 0.5 });
 
@@ -623,6 +649,129 @@ const buildBaseMannequin = () => {
 };
 
 buildBaseMannequin();
+
+const cloneGltfScene = async (url) => {
+  const cached = gltfCache.get(url);
+  if (cached) return cached.clone(true);
+
+  const sceneAsset = await new Promise((resolve, reject) => {
+    gltfLoader.load(
+      url,
+      (gltf) => resolve(gltf.scene || gltf.scenes?.[0]),
+      undefined,
+      reject
+    );
+  });
+
+  gltfCache.set(url, sceneAsset);
+  return sceneAsset.clone(true);
+};
+
+const disposeMaterial = (material) => {
+  if (!material) return;
+  material.dispose?.();
+};
+
+const clearRemoteFigure = () => {
+  while (remoteFigureGroup.children.length) {
+    const child = remoteFigureGroup.children[0];
+    remoteFigureGroup.remove(child);
+    child.traverse((node) => {
+      if (node.geometry) node.geometry.dispose?.();
+      if (Array.isArray(node.material)) node.material.forEach(disposeMaterial);
+      else disposeMaterial(node.material);
+    });
+  }
+};
+
+const fitObjectToHeight = (object, targetHeight = 2.22) => {
+  const size = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  let box = new THREE.Box3().setFromObject(object);
+  box.getSize(size);
+  if (!size.y || !Number.isFinite(size.y)) return false;
+
+  const scale = targetHeight / size.y;
+  object.scale.setScalar(scale);
+
+  box = new THREE.Box3().setFromObject(object);
+  box.getCenter(center);
+  object.position.x -= center.x;
+  object.position.z -= center.z;
+  object.position.y -= box.min.y;
+  return true;
+};
+
+const retintLoadedBody = (object) => {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+  const minY = box.min.y;
+  const maxY = box.max.y;
+  const total = Math.max(0.001, maxY - minY);
+
+  object.traverse((node) => {
+    if (!node.isMesh) return;
+    node.castShadow = true;
+    node.receiveShadow = true;
+    node.material = new THREE.MeshPhysicalMaterial({
+      color: 0x161a1e,
+      roughness: 0.86,
+      metalness: 0.03,
+      clearcoat: 0.08,
+      clearcoatRoughness: 0.85
+    });
+
+    if (!node.geometry?.boundingBox) node.geometry?.computeBoundingBox?.();
+    const bb = node.geometry?.boundingBox;
+    const centerYLocal = bb ? (bb.min.y + bb.max.y) * 0.5 : 0;
+    const centerWorldY = node.localToWorld(new THREE.Vector3(0, centerYLocal, 0)).y;
+    const ratio = (centerWorldY - minY) / total;
+
+    if (ratio < 0.44) {
+      node.material.color.set(0x11161d);
+      node.material.roughness = 0.92;
+    } else if (ratio < 0.86) {
+      node.material.color.set(0x0d1116);
+      node.material.roughness = 0.95;
+    } else {
+      node.material.color.set(0x2b3137);
+      node.material.roughness = 0.9;
+    }
+  });
+};
+
+const loadPublicMannequin = async () => {
+  for (const source of PUBLIC_MODEL_SOURCES.body) {
+    try {
+      const sceneAsset = await cloneGltfScene(source.url);
+      clearRemoteFigure();
+      const modelRoot = new THREE.Group();
+      modelRoot.position.set(0, 0.11, 0);
+      modelRoot.rotation.set(0, -0.03, 0.01);
+      modelRoot.add(sceneAsset);
+      const ok = fitObjectToHeight(sceneAsset, 2.24);
+      if (!ok) throw new Error('Body model had invalid bounds');
+      retintLoadedBody(sceneAsset);
+      remoteFigureGroup.add(modelRoot);
+      proceduralFigureGroup.visible = false;
+      remoteBodyLoaded = true;
+      remoteBodySourceName = source.name;
+      state.mannequinMode = 'public_glb';
+      state.mannequinSourceName = source.name;
+      renderAll();
+      return;
+    } catch (error) {
+      console.warn(`Failed to load public mannequin from ${source.url}`, error);
+    }
+  }
+
+  remoteBodyLoaded = false;
+  state.mannequinMode = 'procedural';
+  state.mannequinSourceName = 'Built-in procedural mannequin';
+  proceduralFigureGroup.visible = true;
+  renderAll();
+};
 
 const createGearMaterial = (hex) => new THREE.MeshPhysicalMaterial({
   color: new THREE.Color(hex),
@@ -839,13 +988,19 @@ const buildHelmetMesh = (styleKey, colorHex) => {
 
 const renderSceneGear = () => {
   clearGearGroup();
+  const bodyYOffset = remoteBodyLoaded ? 0.03 : 0;
 
   if (state.selectedVest) {
-    gearGroup.add(buildVestMesh(state.selectedVest.style_key, state.selectedVestColor.color_code));
+    const vest = buildVestMesh(state.selectedVest.style_key, state.selectedVestColor.color_code);
+    vest.position.y += bodyYOffset;
+    gearGroup.add(vest);
   }
 
   if (state.selectedHelmet) {
-    gearGroup.add(buildHelmetMesh(state.selectedHelmet.style_key, state.selectedHelmetColor.color_code));
+    const helmet = buildHelmetMesh(state.selectedHelmet.style_key, state.selectedHelmetColor.color_code);
+    helmet.position.y += bodyYOffset + (remoteBodyLoaded ? -0.015 : 0);
+    helmet.scale.multiplyScalar(remoteBodyLoaded ? 0.96 : 1);
+    gearGroup.add(helmet);
   }
 };
 
@@ -902,7 +1057,9 @@ const updateSummary = () => {
 
   ui.selectedSummary.textContent = summaryParts.join(' • ');
   ui.selectedPrice.textContent = totalPrice() > 0 ? `Combined product total: ${centsToDollars(totalPrice())}` : 'Choose gear to preview the setup.';
-  ui.dataModePill.textContent = state.sourceMode === 'db' ? 'Live Neon products' : 'Fallback preview products';
+  const sourceLabel = state.sourceMode === 'db' ? 'Live Neon products' : 'Fallback preview products';
+  const mannequinLabel = state.mannequinMode === 'public_glb' ? `CC0 public mannequin` : 'Built-in mannequin';
+  ui.dataModePill.textContent = `${sourceLabel} • ${mannequinLabel}`;
 };
 
 const renderSlotColorPicker = (target, product, selectedColor, slot) => {
@@ -1079,5 +1236,5 @@ const animate = (time) => {
   requestAnimationFrame(animate);
 };
 
-loadProducts();
+Promise.allSettled([loadProducts(), loadPublicMannequin()]);
 requestAnimationFrame(animate);

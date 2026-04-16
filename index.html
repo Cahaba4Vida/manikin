@@ -18,7 +18,7 @@
           <p class="eyebrow">NETLIFY + NEON MVP</p>
           <h1>Tactical 3D Configurator</h1>
           <p class="subtext">
-            Stylized male mannequin with fixed black long-sleeve shirt and black pants. Swap vest and helmet products, then set their colors independently.
+            Loads a CC0 public male base mesh when available, then applies a black long-sleeve / black pants look. Swap vest and helmet products, then set their colors independently.
           </p>
         </div>
         <div class="pill-row">
@@ -109,6 +109,7 @@
               <li>For a quick visual preview, drag this folder or ZIP to Netlify Drop.</li>
               <li>For Neon-backed products, push to GitHub and import the repo into Netlify.</li>
               <li>Set <code>NEON_DATABASE_URL</code> in Netlify before production use.</li>
+              <li>The mannequin now attempts to load a public CC0 GLB at runtime and falls back automatically if it cannot.</li>
             </ul>
           </section>
         </aside>
