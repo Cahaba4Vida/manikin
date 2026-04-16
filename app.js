@@ -1,6 +1,6 @@
-import * as THREE from 'https://unpkg.com/three@0.176.0/build/three.module.js';
-import { OrbitControls } from 'https://unpkg.com/three@0.176.0/examples/jsm/controls/OrbitControls.js';
-import { RoundedBoxGeometry } from 'https://unpkg.com/three@0.176.0/examples/jsm/geometries/RoundedBoxGeometry.js';
+import * as THREE from 'https://esm.sh/three@0.176.0';
+import { OrbitControls } from 'https://esm.sh/three@0.176.0/examples/jsm/controls/OrbitControls.js';
+import { RoundedBoxGeometry } from 'https://esm.sh/three@0.176.0/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 const fallbackProducts = [
   {

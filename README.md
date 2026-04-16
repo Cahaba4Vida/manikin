@@ -106,3 +106,6 @@ When you want a more realistic viewer, the next step is:
 - keep the same DB structure and UI controls
 
 That way the backend and product logic stay the same.
+
+
+Patch: switched Three.js imports to esm.sh for browser-safe module resolution on Netlify, and added a favicon to remove the 404 warning.
